@@ -1,0 +1,149 @@
+.TH CSPTR 3  2026-10-01 "" ""
+.SH NAME
+csptr \- smart pointers for the C programming language
+.SH SYNOPSIS
+.nf
+.B #include <csptr/smart_ptr.h>
+.sp
+.BI "void *unique_ptr(" "Size" ", " ", ... );"
+.BI "void *shared_ptr(" "Size" ", " ", ... );"
+.sp
+.BI "bool ensure_unique(void *" "ptr" ");"
+.BI "bool ensure_shared(void *" "ptr" ");"
+.BI "void *unique_ptr(void *" "ptr" ");"
+.BI "void *shared_ptr(void *" "ptr" ");"
+.sp
+.B #include <csptr/smart_ptr.h>
+.B #include <csptr/smalloc.h>
+.BI "void *smalloc(int " "kind" ", size_t " "size" ");"
+.BI "void *smalloc(int " "kind" ", size_t " "size" ", void (" "*dtor" ")(void *, void *);"
+.BI "void sfree(void " "*ptr" ");"
+.BI "void *sref(void " "*ptr" ");"
+.fi
+.SH DESCRIPTION
+.PP
+The
+.BR smalloc ()
+function calls an allocator
+.BR "" ( malloc (3)
+by default), such that the returned pointer is a smart pointer.
+.IR "The memory is not initialized" ,
+and great care should be taken to initialize it before destruction if a
+destructor has been specified. If
+.I size
+is 0, then
+.BR smalloc ()
+returns NULL.
+.PP
+The
+.BR sfree ()
+function calls the deallocator associated to the
+.BR smalloc ()
+allocator
+.BR "" ( free (3)
+by default) on
+.I ptr
+if the smart pointer is either unique or shared with a reference
+count of 0. If the smart pointer is shared, it shall decrement the reference
+counter by 1 before checking if the deallocator needs to be called.
+.PP
+The
+.BR sref ()
+function creates a new reference to
+.IR "ptr" ,
+incrementing the internal reference counter of the smart shared pointer by 1.
+It shall only be called on a shared pointer.
+.PP
+The
+.BR unique_ptr ()
+and
+.BR shared_ptr ()
+macros expand to a call to the
+.BR smalloc ()
+function with either UNIQUE or SHARED for the
+.I kind
+parameter.
+Additional parameters are passed as-is to the function.
+.PP
+The
+.BR ensure_unique ()
+and
+.BR ensure_shared ()
+functions check whether a pointer is unique or shared and return the appropriate
+bool representation.
+.PP
+The
+.BR make_unique ()
+and
+.BR make_shared ()
+functions return a new pointer or a reference to a shared pointer. Should a new pointer
+be created the memory of the old pointer is copied to the new memory.
+The pointers passed to these functions are never freed by the function.
+.SH RETURN VALUE
+The
+.BR smalloc ()
+function return a pointer to the newly allocated memory.
+On error, it returns NULL.
+NULL may also be returned by a successful call to
+.BR smalloc ()
+with a
+.I size
+of zero.
+.PP
+The
+.BR sfree ()
+function returns no value.
+.PP
+The
+.BR sref ()
+function returns
+.IR "ptr" .
+.PP
+The
+.BR ensure_unique ()
+function returns
+.IR "true"
+if the pointer is unique
+.IR "false"
+otherwise.
+.PP
+The
+.BR ensure_shared ()
+function returns
+.IR "true"
+if the pointer is shared
+.IR "false"
+otherwise.
+.PP
+The
+.BR make_unique ()
+function returns
+.IR "a new pointer"
+if the
+.BR "pointer"
+passed to the function was
+.IR shared
+otherwise (if it was unique) it returns
+.IR NULL .
+.PP
+The
+.BR make_shared ()
+function returns
+.IR "a reference"
+if the
+.BR "pointer"
+passed to the function was
+.IR shared
+otherwise (if it was unique) it returns
+.IR "a new pointer"
+with a reference count of 1.
+.BR "A Reference"
+in this situation means that calling
+.BR "make_shared" "()"
+on a shared pointer will be the same as calling
+.BR "sref" "()."
+
+.SH SEE ALSO
+.ad l
+.nh
+.BR malloc (3)
