@@ -19,7 +19,6 @@ endif()
 option(LIBCSPTR_TESTS "Turn on tests" ON)
 
 find_package(Check)
-MESSAGE( STATUS "After Check: ${CHECK_FOUND} ${CHECK_INCLUDE_DIR} ${CHECK_LIBRARIES}" )
 if (CHECK_FOUND AND LIBCSPTR_TESTS AND NOT LIBCSPTR_DISABLE_TESTS)
 	add_subdirectory(check)
 endif()
